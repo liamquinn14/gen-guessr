@@ -24,6 +24,7 @@ type SocketContext = {
   updateLobby: (lobby: Lobby) => void;
   updatePlayer: (player: Player) => void;
   state: Lobby | null;
+  clientId: string;
 };
 
 const SocketContext = createContext<SocketContext | null>(null);
@@ -81,7 +82,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           joinLobby,
           updateLobby,
           updatePlayer,
-          state
+          state,
+          clientId: ws.current?.id || ""
         } as SocketContext
       }
     >
