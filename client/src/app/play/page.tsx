@@ -11,6 +11,9 @@ export default function Menu() {
             <Link href="/play/join-lobby">
                 <Button>JOIN LOBBY</Button>
             </Link>
+            <Link href="/">
+                <Button className="bg-red-700 text-red-50 mt-6 hover:bg-red-800">BACK</Button>
+            </Link>
         </div>
     )
 }
