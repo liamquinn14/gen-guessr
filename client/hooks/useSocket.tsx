@@ -21,6 +21,7 @@ export type Player = {
 type SocketContext = {
   createLobby: (mode: "images" | "text") => void;
   joinLobby: (id: string) => void;
+  updatePlayer: (player: Player) => void;
   state: Lobby | null;
 };
 
@@ -44,6 +45,11 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       router.push(`/play/lobbies/${lobby.id}`); 
     });
 
+    socket.on("lobby-updated", (lobby: Lobby) => {
+      console.log("Lobby updated: ", lobby);
+      setState(lobby);
+    })
+
     ws.current = socket;
     return () => {
       socket.disconnect();
@@ -58,12 +64,17 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     ws.current?.emit("join-lobby", id);
   }
 
+  const updatePlayer = (player: Player) => {
+    ws.current?.emit("update-player", player);
+  }
+
   return (
     <SocketContext.Provider
       value={
         {
           createLobby,
           joinLobby,
+          updatePlayer,
           state
         } as SocketContext
       }
