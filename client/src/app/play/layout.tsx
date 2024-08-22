@@ -1,5 +1,5 @@
 "use client"
-import { SocketProvider } from "../../../../hooks/useSocket";
+import { SocketProvider } from "../../../hooks/useSocket";
 
 
 export default function RootLayout({

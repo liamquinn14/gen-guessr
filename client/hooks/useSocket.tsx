@@ -1,51 +1,70 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { Socket, io } from "socket.io-client";
 
+export type Lobby = {
+  id: string;
+  mode: "images" | "text";
+  players: Player[];
+  gameScreen: string;
+  round: number;
+};
+
+export type Player = {
+  id: string;
+  name: string;
+  score: number;
+  isReady: boolean;
+};
+
 type SocketContext = {
-  messages: string[];
-  message: string;
-  setMessage: (e: React.FormEvent<HTMLInputElement>) => void;
-  sendMessage: () => void;
+  createLobby: (mode: "images" | "text") => void;
+  joinLobby: (id: string) => void;
+  state: Lobby | null;
 };
 
 const SocketContext = createContext<SocketContext | null>(null);
 
+
 export const useSocket = () => useContext(SocketContext);
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
-  const [messages, setMessages] = useState<string[]>([]);
-  const [message, setMessage] = useState<string>("");
-
+  const router = useRouter();
+  
+  const [state, setState] = useState<Lobby | null>(null);
   const ws = useRef<Socket | null>(null);
 
   useEffect(() => {
     const socket = io("http://localhost:82");
-    socket.on("message", (message) => {
-      console.log(message)
-      setMessages((messages) => [...messages, message]);
+
+    socket.on("join-lobby", (lobby: Lobby) => {
+      console.log("Joined lobby: ", lobby);
+      setState(lobby);
+      router.push(`/play/lobbies/${lobby.id}`); 
     });
+
     ws.current = socket;
     return () => {
       socket.disconnect();
     };
   }, []);
 
-  const sendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    ws.current?.emit("message", message);
-    setMessage("");
-  };
+  const createLobby = (mode: 'images' | 'text') => {
+    ws.current?.emit("create-lobby", mode);
+  }
+
+  const joinLobby = (id: string) => {
+    ws.current?.emit("join-lobby", id);
+  }
 
   return (
     <SocketContext.Provider
       value={
         {
-          messages,
-          message,
-          setMessage: (e: React.FormEvent<HTMLInputElement>) =>
-            setMessage(e.currentTarget.value),
-          sendMessage,
+          createLobby,
+          joinLobby,
+          state
         } as SocketContext
       }
     >
