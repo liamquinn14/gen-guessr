@@ -1,8 +1,8 @@
 "use client"
-import { ChangeEvent, useState, useRef, useEffect } from "react"
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import Link from "next/link"
+import { ChangeEvent, useEffect, useRef, useState } from "react"
 
 export default function JoinLobby() {
 
