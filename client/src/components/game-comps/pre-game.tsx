@@ -1,6 +1,6 @@
 "use client"
 import NotFound from "@/app/play/lobbies/[lobbyId]/not-found";
-import { useSocket } from "../../../hooks/useSocket";
+import { Lobby, useSocket } from "../../../hooks/useSocket";
 import { Button } from "../ui/button";
 
 export default function PreGame() {
@@ -9,8 +9,11 @@ export default function PreGame() {
     if (!socket) {
         return <NotFound />;
     }
-    const { state } = socket;
+    const { state, clientId, updateLobby } = socket;
     const { players, mode, id } = state!;
+
+    const clientPlayer = players.find((player) => player.id === clientId);
+    const isHost = !!players.find((player) => player.id === clientId)?.isHost
 
     const playerElements = players.map((player) => {
         return (
@@ -20,6 +23,11 @@ export default function PreGame() {
 
     function startGame() {
         console.log("Starting game...");
+        const startedGameState = {
+            ...state,
+            gameScreen: "img-question"
+        }
+        updateLobby(startedGameState as Lobby);
     }
 
     return (
@@ -30,7 +38,7 @@ export default function PreGame() {
             <p className="text-zinc-100 text-xl mt-4 w-3/4 md:w-1/2 text-center capitalize">Mode: {mode}</p>
             <h3 className="text-yellow-300 text-xl mt-6 text-center font-semibold mb-2">Players:</h3>
             {playerElements}
-            <Button onClick={startGame}>START GAME</Button>
+            { isHost && <Button onClick={startGame} className="mt-6">START GAME</Button> }
         </div>
     )
 }

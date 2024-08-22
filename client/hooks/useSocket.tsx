@@ -16,6 +16,7 @@ export type Player = {
   name: string;
   score: number;
   isReady: boolean;
+  isHost: boolean;
 };
 
 type SocketContext = {
