@@ -3,9 +3,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import { ChangeEvent, useEffect, useRef, useState } from "react"
+import { useSocket } from "../../../../hooks/useSocket"
 
 export default function JoinLobby() {
-
+    const socket = useSocket();
+    if(!socket) return null;
+    const { joinLobby } = socket;
     const [lobbyCode, setLobbyCode] = useState<string>("")
     const inputRef = useRef<HTMLInputElement>(null)
 
@@ -19,7 +22,7 @@ export default function JoinLobby() {
 
     function handleJoin() {
         console.log("Joining lobby with code: ", lobbyCode)
-        setLobbyCode("")
+        joinLobby(lobbyCode)
     }
 
     return (
