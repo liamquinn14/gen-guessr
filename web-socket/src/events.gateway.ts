@@ -7,6 +7,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
+import { Lobby } from './types/lobby';
 
 @WebSocketGateway(82, {
   // namespace: 'events',
@@ -49,6 +50,7 @@ export class EventsGateway
       name: 'Player 1',
       score: 0,
       isReady: false,
+      isHost: true,
     };
 
     const lobby = {
@@ -86,6 +88,27 @@ export class EventsGateway
     this.server.to(lobby.players.map((p) => p.id)).emit('lobby-updated', lobby); //TODO: update all clients to new lobby
   }
 
+  @SubscribeMessage('update-lobby')
+  handleUpdateLobby(client: any, lobby: Lobby) {
+    const l = this.state.lobbies.find((l) => l.id === lobby.id);
+    const player = l.players.find((p) => p.id === client.id);
+    if (!player || !player.isHost) {
+      //this.server.to(client.id).emit('player-not-found'); //TODO: handle issue
+      console.log('Player not found');
+      return;
+    }
+
+    //TODO: only update the parts of the lobby needed to be updated
+    this.state = {
+      ...this.state,
+      lobbies: this.state.lobbies.map((l) => (l.id === lobby.id ? lobby : l)),
+    };
+
+    this.server.to(lobby.players.map((p) => p.id)).emit('lobby-updated', lobby);
+  }
+  
+  
+  
   @SubscribeMessage('update-player')
   handleUpdatePlayer(client: any, player: any) {
     const lobby = this.state.lobbies.find((l) => l.players.includes(client.id));
@@ -113,6 +136,8 @@ export class EventsGateway
     this.server.to(lobby.players.map((p) => p.id)).emit('lobby-updated', lobby);
     //this.server.to(lobby.players).emit('lobby-updated', lobby); //TODO: update all clients to new lobby
   }
+
+
 
 
 }
